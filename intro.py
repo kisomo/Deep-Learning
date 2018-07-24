@@ -26,16 +26,13 @@ plt.scatter(X[:, 0], X[:, 1], c=y, cmap=plt.cm.Paired, s=20)
 plt.show()
 
 def expand(X):
-    """
-    Adds quadratic features. 
-    This expansion allows your linear model to make non-linear separation.
+    #Adds quadratic features. 
+    #This expansion allows your linear model to make non-linear separation.
+    #For each sample (row in matrix), compute an expanded row:
+    #[feature0, feature1, feature0^2, feature1^2, feature0*feature1, 1]
+    #:param X: matrix of features, shape [n_samples,2]
+    #:returns: expanded features of shape [n_samples,6]
     
-    For each sample (row in matrix), compute an expanded row:
-    [feature0, feature1, feature0^2, feature1^2, feature0*feature1, 1]
-    
-    :param X: matrix of features, shape [n_samples,2]
-    :returns: expanded features of shape [n_samples,6]
-    """
     X_expanded = np.zeros((X.shape[0], 6))
     
     # TODO:<your code here>
@@ -60,16 +57,15 @@ print(y[:10])
 
 
 def probability(X, w):
-    """
-    Given input features and weights
-    return predicted probabilities of y==1 given x, P(y=1|x), see description above
+    #Given input features and weights
+    #return predicted probabilities of y==1 given x, P(y=1|x), see description above
         
-    Don't forget to use expand(X) function (where necessary) in this and subsequent functions.
+    #Don't forget to use expand(X) function (where necessary) in this and subsequent functions.
     
-    :param X: feature matrix X of shape [n_samples,6] (expanded)
-    :param w: weight vector w of shape [6] for each of the expanded features
-    :returns: an array of predicted probabilities in [0,1] interval.
-    """
+    #:param X: feature matrix X of shape [n_samples,6] (expanded)
+    #:param w: weight vector w of shape [6] for each of the expanded features
+    #:returns: an array of predicted probabilities in [0,1] interval.
+    
 
     # TODO:<your code here>
     a = expand(X)
@@ -83,15 +79,14 @@ print(res.shape)
 print(res[:10])
 
 def compute_loss(X, y, w):
-    """
-    Given feature matrix X [n_samples,6], target vector [n_samples] of 1/0,
-    and weight vector w [6], compute scalar loss function using formula above.
-    """
+    #Given feature matrix X [n_samples,6], target vector [n_samples] of 1/0,
+    #and weight vector w [6], compute scalar loss function using formula above.
+    
     # TODO:<your code here>
-    a = - np.sum(np.multiply(y, np.log(probability(X,w))) + np.multiply((1-y), np.log(1-probability(X,w))))
+    a = - np.sum(np.multiply(y, np.log1p(probability(X,w))) + np.multiply((1-y), np.log1p(1-probability(X,w))))
     return a
 
-res2 = compute_loss(X,y,w)
+res2 = compute_loss(X1,y,w)
 print(res2)
 
 ## GRADED PART, DO NOT CHANGE!
@@ -100,11 +95,147 @@ print(res2)
 #grader.submit(COURSERA_EMAIL, COURSERA_TOKEN)
 
 def compute_grad(X, y, w):
-    """
-    Given feature matrix X [n_samples,6], target vector [n_samples] of 1/0,
-    and weight vector w [6], compute vector [6] of derivatives of L over each weights.
-    """
-    
+    #Given feature matrix X [n_samples,6], target vector [n_samples] of 1/0,
+    #and weight vector w [6], compute vector [6] of derivatives of L over each weights.    
     # TODO<your code here>
-
+    a = y - probability(X,w)
+    res = np.dot(a,X)
+    return res
     
+res3 = compute_grad(X1,y,w)
+print(res3)
+
+# use output of this cell to fill answer field 
+ans_part3 = np.linalg.norm(compute_grad(X1, y,w))
+print(ans_part3)
+
+## GRADED PART, DO NOT CHANGE!
+#grader.set_answer("uNidL", ans_part3)
+
+## you can make submission with answers so far to check yourself at this stage
+#grader.submit(COURSERA_EMAIL, COURSERA_TOKEN)
+
+from IPython import display
+
+h = 0.01
+x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
+
+def visualize(X, y, w, history):
+    #draws classifier prediction with matplotlib magic
+    Z = probability(expand(np.c_[xx.ravel(), yy.ravel()]), w)
+    Z = Z.reshape(xx.shape)
+    plt.subplot(1, 2, 1)
+    plt.contourf(xx, yy, Z, alpha=0.8)
+    plt.scatter(X[:, 0], X[:, 1], c=y, cmap=plt.cm.Paired)
+    plt.xlim(xx.min(), xx.max())
+    plt.ylim(yy.min(), yy.max())
+    
+    plt.subplot(1, 2, 2)
+    plt.plot(history)
+    plt.grid()
+    ymin, ymax = plt.ylim()
+    plt.ylim(0, ymax)
+    display.clear_output(wait=True)
+    plt.show()
+
+visualize(X1,y,w,[0.5, 0.5, 0.25])
+
+# ---------------------------------------------------- mini-batch ----------------------------------------------------------
+
+# please use np.random.seed(42), eta=0.1, n_iter=100 and batch_size=4 for deterministic results
+
+np.random.seed(42)
+w = np.array([0, 0, 0, 0, 0, 1])
+print(w)
+eta= 0.1 # learning rate
+
+n_iter = 100
+batch_size = 4
+loss = np.zeros(n_iter)
+plt.figure(figsize=(12, 5))
+
+for i in range(n_iter):
+    ind = np.random.choice(X1.shape[0], batch_size)
+    loss[i] = compute_loss(X1, y, w)
+    if i % 10 == 0:
+        visualize(X1[ind, :], y[ind], w, loss)
+
+    # TODO:<your code here>
+    w = w - eta*compute_grad(X1[ind,:],y[ind],w)
+
+visualize(X1, y, w, loss)
+plt.clf()
+
+print("___________________________")
+print(w)
+#print("---------------------------")
+#print(loss)
+
+# ----------------------------------------------------SGD with momentum -----------------------------------------------------
+# please use np.random.seed(42), eta=0.05, alpha=0.9, n_iter=100 and batch_size=4 for deterministic results
+np.random.seed(42)
+w = np.array([0, 0, 0, 0, 0, 1])
+
+eta = 0.05 # learning rate
+alpha = 0.9 # momentum
+nu = np.zeros_like(w)
+
+n_iter = 100
+batch_size = 4
+loss = np.zeros(n_iter)
+plt.figure(figsize=(12, 5))
+
+for i in range(n_iter):
+    ind = np.random.choice(X1.shape[0], batch_size)
+    loss[i] = compute_loss(X1, y, w)
+    if i % 10 == 0:
+        visualize(X1[ind, :], y[ind], w, loss)
+
+    # TODO:<your code here>
+    nu = alpha*nu + eta*compute_grad(X1[ind,:],y[ind],w)
+    w = w - nu
+
+visualize(X1, y, w, loss)
+plt.clf()
+
+print(w)
+
+#------------------------------------------------------- RMSPROP --------------------------------------------------------
+'''
+# please use np.random.seed(42), eta=0.1, alpha=0.9, n_iter=100 and batch_size=4 for deterministic results
+np.random.seed(42)
+
+w = np.array([0, 0, 0, 0, 0, 1.])
+
+eta = 0.1 # learning rate
+alpha = 0.9 # moving average of gradient norm squared
+g2 = None
+eps = 1e-8
+
+n_iter = 100
+batch_size = 4
+loss = np.zeros(n_iter)
+plt.figure(figsize=(12,5))
+for i in range(n_iter):
+    ind = np.random.choice(X_expanded.shape[0], batch_size)
+    loss[i] = compute_loss(X_expanded, y, w)
+    if i % 10 == 0:
+        visualize(X_expanded[ind, :], y[ind], w, loss)
+
+    # TODO:<your code here>
+
+visualize(X, y, w, loss)
+plt.clf()
+'''
+
+
+
+
+
+
+
+
+
+
