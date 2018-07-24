@@ -231,8 +231,33 @@ plt.clf()
 '''
 
 
+#------------------------------------------------------- ADAM --------------------------------------------------------
+'''
+# please use np.random.seed(42), eta=0.1, alpha=0.9, n_iter=100 and batch_size=4 for deterministic results
+np.random.seed(42)
 
+w = np.array([0, 0, 0, 0, 0, 1.])
 
+eta = 0.1 # learning rate
+alpha = 0.9 # moving average of gradient norm squared
+g2 = None
+eps = 1e-8
+
+n_iter = 100
+batch_size = 4
+loss = np.zeros(n_iter)
+plt.figure(figsize=(12,5))
+for i in range(n_iter):
+    ind = np.random.choice(X_expanded.shape[0], batch_size)
+    loss[i] = compute_loss(X_expanded, y, w)
+    if i % 10 == 0:
+        visualize(X_expanded[ind, :], y[ind], w, loss)
+
+    # TODO:<your code here>
+
+visualize(X, y, w, loss)
+plt.clf()
+'''
 
 
 
