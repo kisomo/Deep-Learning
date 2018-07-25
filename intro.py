@@ -142,10 +142,38 @@ def visualize(X, y, w, history):
 
 visualize(X1,y,w,[0.5, 0.5, 0.25])
 
+# ---------------------------------------------------- SGD ----------------------------------------------------------
+print("------------------------SGD ---------------------")
+np.random.seed(42)
+w = np.array([0, 0, 0, 0, 0, 1])
+print(w)
+eta= 0.1 # learning rate
+
+n_iter = 100
+batch_size = 1
+loss = np.zeros(n_iter)
+plt.figure(figsize=(12, 5))
+
+for i in range(n_iter):
+    ind = np.random.choice(X1.shape[0], batch_size)
+    loss[i] = compute_loss(X1, y, w)
+    #if i % 10 == 0:
+    #    visualize(X1[ind, :], y[ind], w, loss)
+
+    # TODO:<your code here>
+    w = w - eta*compute_grad(X1[ind,:],y[ind],w)
+
+visualize(X1, y, w, loss)
+plt.clf()
+
+print(w)
+#print("---------------------------")
+#print(loss)
+
 # ---------------------------------------------------- mini-batch ----------------------------------------------------------
 
 # please use np.random.seed(42), eta=0.1, n_iter=100 and batch_size=4 for deterministic results
-
+print("-----------------------mini-batch ----------------------------")
 np.random.seed(42)
 w = np.array([0, 0, 0, 0, 0, 1])
 print(w)
@@ -159,8 +187,8 @@ plt.figure(figsize=(12, 5))
 for i in range(n_iter):
     ind = np.random.choice(X1.shape[0], batch_size)
     loss[i] = compute_loss(X1, y, w)
-    if i % 10 == 0:
-        visualize(X1[ind, :], y[ind], w, loss)
+    #if i % 10 == 0:
+    #    visualize(X1[ind, :], y[ind], w, loss)
 
     # TODO:<your code here>
     w = w - eta*compute_grad(X1[ind,:],y[ind],w)
@@ -168,16 +196,16 @@ for i in range(n_iter):
 visualize(X1, y, w, loss)
 plt.clf()
 
-print("___________________________")
 print(w)
 #print("---------------------------")
 #print(loss)
 
-# ----------------------------------------------------SGD with momentum -----------------------------------------------------
+# ----------------------------------------------------mini-batch with momentum -----------------------------------------------------
+print("-----------------------------mini-batch with momentum -----------------------------------------")
 # please use np.random.seed(42), eta=0.05, alpha=0.9, n_iter=100 and batch_size=4 for deterministic results
 np.random.seed(42)
 w = np.array([0, 0, 0, 0, 0, 1])
-
+print(w)
 eta = 0.05 # learning rate
 alpha = 0.9 # momentum
 nu = np.zeros_like(w)
@@ -190,8 +218,8 @@ plt.figure(figsize=(12, 5))
 for i in range(n_iter):
     ind = np.random.choice(X1.shape[0], batch_size)
     loss[i] = compute_loss(X1, y, w)
-    if i % 10 == 0:
-        visualize(X1[ind, :], y[ind], w, loss)
+    #if i % 10 == 0:
+    #    visualize(X1[ind, :], y[ind], w, loss)
 
     # TODO:<your code here>
     nu = alpha*nu + eta*compute_grad(X1[ind,:],y[ind],w)
@@ -202,62 +230,153 @@ plt.clf()
 
 print(w)
 
+
+# ----------------------------------------------------Nesterov momentum -----------------------------------------------------
+print("--------------------------Nesterov momentum -----------------------------------------")
+# please use np.random.seed(42), eta=0.05, alpha=0.9, n_iter=100 and batch_size=4 for deterministic results
+np.random.seed(42)
+w = np.array([0, 0, 0, 0, 0, 1])
+print(w)
+eta = 0.05 # learning rate
+alpha = 0.9 # momentum
+nu = np.zeros_like(w)
+
+n_iter = 100
+batch_size = 4
+loss = np.zeros(n_iter)
+plt.figure(figsize=(12, 5))
+
+for i in range(n_iter):
+    ind = np.random.choice(X1.shape[0], batch_size)
+    loss[i] = compute_loss(X1, y, w)
+    #if i % 10 == 0:
+    #    visualize(X1[ind, :], y[ind], w, loss)
+
+    # TODO:<your code here>
+    nu = alpha*nu + eta*compute_grad(X1[ind,:],y[ind],w-alpha*nu)
+    w = w - nu
+
+visualize(X1, y, w, loss)
+plt.clf()
+
+print(w)
+
+# ----------------------------------------------------AdaGrad-----------------------------------------------------
+print("----------------------AdaGrad -----------------------------------------")
+# please use np.random.seed(42), eta=0.05, alpha=0.9, n_iter=100 and batch_size=4 for deterministic results
+np.random.seed(42)
+w = np.array([0, 0, 0, 0, 0, 1])
+print(w)
+
+eps = 0.05 #1e-8
+eta = 0.8 # learning rate
+#alpha = 0.9 # momentum
+#nu = np.zeros_like(w)
+G = np.zeros_like(w)
+
+n_iter = 100
+batch_size = 4
+loss = np.zeros(n_iter)
+plt.figure(figsize=(12, 5))
+
+for i in range(n_iter):
+    ind = np.random.choice(X1.shape[0], batch_size)
+    loss[i] = compute_loss(X1, y, w)
+    #if i % 10 == 0:
+    #    visualize(X1[ind, :], y[ind], w, loss)
+
+    # TODO:<your code here>
+    #nu = alpha*nu + eta*compute_grad(X1[ind,:],y[ind],w)
+    #w = w - nu
+    g = compute_grad(X1[ind,:],y[ind],w)
+    for j in range(len(w)):
+        G[j] = G[j] + g[j]**2
+        w[j] = w[j] - (eta/(np.sqrt(G[j]+eps)))*g[j]
+
+visualize(X1, y, w, loss)
+plt.clf()
+
+print(w)
+
+
 #------------------------------------------------------- RMSPROP --------------------------------------------------------
-'''
+print("--------------------RMSPROP -------------------------------")
 # please use np.random.seed(42), eta=0.1, alpha=0.9, n_iter=100 and batch_size=4 for deterministic results
 np.random.seed(42)
 
 w = np.array([0, 0, 0, 0, 0, 1.])
-
-eta = 0.1 # learning rate
+print(w)
+eta = 0.01 # learning rate
 alpha = 0.9 # moving average of gradient norm squared
-g2 = None
-eps = 1e-8
+#g2 = None
+eps = 0.05 #1e-8
+
+G = np.zeros_like(w)
 
 n_iter = 100
 batch_size = 4
 loss = np.zeros(n_iter)
 plt.figure(figsize=(12,5))
 for i in range(n_iter):
-    ind = np.random.choice(X_expanded.shape[0], batch_size)
-    loss[i] = compute_loss(X_expanded, y, w)
-    if i % 10 == 0:
-        visualize(X_expanded[ind, :], y[ind], w, loss)
+    ind = np.random.choice(X1.shape[0], batch_size)
+    loss[i] = compute_loss(X1, y, w)
+    #if i % 10 == 0:
+    #    visualize(X1[ind, :], y[ind], w, loss)
 
     # TODO:<your code here>
+    g = compute_grad(X1[ind,:],y[ind],w)
+    for j in range(len(w)):
+        G[j] = alpha*G[j] + (1-alpha)*g[j]**2
+        w[j] = w[j] - (eta/(np.sqrt(G[j]+eps)))*g[j]
 
 visualize(X, y, w, loss)
 plt.clf()
-'''
+
+print(w)
 
 
 #------------------------------------------------------- ADAM --------------------------------------------------------
-'''
+print("Adam -----------------------------------------")
 # please use np.random.seed(42), eta=0.1, alpha=0.9, n_iter=100 and batch_size=4 for deterministic results
 np.random.seed(42)
 
 w = np.array([0, 0, 0, 0, 0, 1.])
+print(w)
 
 eta = 0.1 # learning rate
 alpha = 0.9 # moving average of gradient norm squared
 g2 = None
-eps = 1e-8
+eps = 0.01 #1e-8
+
+m = np.zeros_like(w)
+v = np.zeros_like(w)
+
+beta1 = 0.9
+beta2 = 0.9
 
 n_iter = 100
 batch_size = 4
 loss = np.zeros(n_iter)
 plt.figure(figsize=(12,5))
 for i in range(n_iter):
-    ind = np.random.choice(X_expanded.shape[0], batch_size)
-    loss[i] = compute_loss(X_expanded, y, w)
-    if i % 10 == 0:
-        visualize(X_expanded[ind, :], y[ind], w, loss)
+    ind = np.random.choice(X1.shape[0], batch_size)
+    loss[i] = compute_loss(X1, y, w)
+    #if i % 10 == 0:
+    #    visualize(X1[ind, :], y[ind], w, loss)
 
     # TODO:<your code here>
+    g = compute_grad(X1[ind,:],y[ind],w)
+    for j in range(len(w)):
+        m[j] = (beta1*m[j] + (1-beta1)*g[j] )/(1-beta1**n_iter)
+        v[j] = (beta2*v[j] + (1-beta2)*g[j]**2 ) /(1-beta2**n_iter)
+        w[j] = w[j] - (eta/(np.sqrt(v[j]+eps)))*m[j]
 
 visualize(X, y, w, loss)
 plt.clf()
-'''
+
+print(w)
+
+
 
 
 
