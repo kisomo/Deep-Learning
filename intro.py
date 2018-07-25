@@ -336,7 +336,7 @@ print(w)
 
 
 #------------------------------------------------------- ADAM --------------------------------------------------------
-print("Adam -----------------------------------------")
+print("--------------------Adam -----------------------------------")
 # please use np.random.seed(42), eta=0.1, alpha=0.9, n_iter=100 and batch_size=4 for deterministic results
 np.random.seed(42)
 
@@ -375,11 +375,6 @@ visualize(X, y, w, loss)
 plt.clf()
 
 print(w)
-
-
-
-
-
 
 
 
