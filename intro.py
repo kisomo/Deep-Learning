@@ -21,6 +21,9 @@ with open('/home/terrence/CODING/Python/MODELS/intro-to-dl/week1/target.npy', 'r
 
 #print(X[:3,:])
 print(X.shape)
+print(y.shape)
+print(X[:3,:])
+print(y[:5])
 
 plt.scatter(X[:, 0], X[:, 1], c=y, cmap=plt.cm.Paired, s=20)
 plt.show()
@@ -47,7 +50,9 @@ def expand(X):
 
 
 X1 = expand(X)
-#print(X1[:3,:])
+print(X1.shape)
+
+print(X1[:3,:])
 
 #tests
 assert isinstance(X1,np.ndarray)#"please make sure you return numpy array"
@@ -68,13 +73,13 @@ def probability(X, w):
     
 
     # TODO:<your code here>
-    a = expand(X)
-    b = np.dot(a,w)
+    #a = expand(X)
+    b = np.dot(X,w)
     c = 1/(1+np.exp(-b))
     return c
 
 w = np.linspace(-1,1,6)
-res = probability(X,w)
+res = probability(X1,w)
 print(res.shape)
 print(res[:10])
 
@@ -122,6 +127,10 @@ x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
 y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
 xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
 
+print(X[:,0].min()-1,X[:,0].max()+1)
+print(X[:,1].min()-1,X[:,1].max()+1)
+print(xx)
+
 def visualize(X, y, w, history):
     #draws classifier prediction with matplotlib magic
     Z = probability(expand(np.c_[xx.ravel(), yy.ravel()]), w)
@@ -142,6 +151,33 @@ def visualize(X, y, w, history):
 
 visualize(X1,y,w,[0.5, 0.5, 0.25])
 
+# ---------------------------------------------------- batch-GD ----------------------------------------------------------
+print("------------------------batch-GD ---------------------")
+np.random.seed(42)
+w = np.array([0, 0, 0, 0, 0, 1])
+print(w)
+eta= 0.01 # learning rate
+
+n_iter = 1000
+batch_size = len(X1)
+loss = np.zeros(n_iter)
+plt.figure(figsize=(12, 5))
+
+for i in range(n_iter):
+    ind = np.random.choice(X1.shape[0], batch_size)
+    loss[i] = compute_loss(X1, y, w)
+    #if i % 10 == 0:
+    #    visualize(X1[ind, :], y[ind], w, loss)
+
+    # TODO:<your code here>
+    w = w - eta*compute_grad(X1[ind,:],y[ind],w)
+
+visualize(X1, y, w, loss)
+plt.clf()
+
+print(w)
+#print(loss)
+
 # ---------------------------------------------------- SGD ----------------------------------------------------------
 print("------------------------SGD ---------------------")
 np.random.seed(42)
@@ -149,7 +185,7 @@ w = np.array([0, 0, 0, 0, 0, 1])
 print(w)
 eta= 0.1 # learning rate
 
-n_iter = 100
+n_iter = 1000
 batch_size = 1
 loss = np.zeros(n_iter)
 plt.figure(figsize=(12, 5))
@@ -167,8 +203,8 @@ visualize(X1, y, w, loss)
 plt.clf()
 
 print(w)
-#print("---------------------------")
 #print(loss)
+
 
 # ---------------------------------------------------- mini-batch ----------------------------------------------------------
 
@@ -179,7 +215,7 @@ w = np.array([0, 0, 0, 0, 0, 1])
 print(w)
 eta= 0.1 # learning rate
 
-n_iter = 100
+n_iter = 1000
 batch_size = 4
 loss = np.zeros(n_iter)
 plt.figure(figsize=(12, 5))
@@ -210,7 +246,7 @@ eta = 0.05 # learning rate
 alpha = 0.9 # momentum
 nu = np.zeros_like(w)
 
-n_iter = 100
+n_iter = 1000
 batch_size = 4
 loss = np.zeros(n_iter)
 plt.figure(figsize=(12, 5))
@@ -241,7 +277,7 @@ eta = 0.05 # learning rate
 alpha = 0.9 # momentum
 nu = np.zeros_like(w)
 
-n_iter = 100
+n_iter = 1000
 batch_size = 4
 loss = np.zeros(n_iter)
 plt.figure(figsize=(12, 5))
@@ -269,12 +305,12 @@ w = np.array([0, 0, 0, 0, 0, 1])
 print(w)
 
 eps = 0.05 #1e-8
-eta = 0.8 # learning rate
+eta = 0.01 # learning rate
 #alpha = 0.9 # momentum
 #nu = np.zeros_like(w)
 G = np.zeros_like(w)
 
-n_iter = 100
+n_iter = 1000
 batch_size = 4
 loss = np.zeros(n_iter)
 plt.figure(figsize=(12, 5))
@@ -313,7 +349,7 @@ eps = 0.05 #1e-8
 
 G = np.zeros_like(w)
 
-n_iter = 100
+n_iter = 1000
 batch_size = 4
 loss = np.zeros(n_iter)
 plt.figure(figsize=(12,5))
@@ -354,7 +390,7 @@ v = np.zeros_like(w)
 beta1 = 0.9
 beta2 = 0.9
 
-n_iter = 100
+n_iter = 1000
 batch_size = 4
 loss = np.zeros(n_iter)
 plt.figure(figsize=(12,5))
@@ -375,6 +411,4 @@ visualize(X, y, w, loss)
 plt.clf()
 
 print(w)
-
-
 
